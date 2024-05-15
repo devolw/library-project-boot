@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск Книги</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<form id="searchForm" method="get" class="mt-4 needs-validation" novalidate>
+    <label for="bookName" class="form-label">Введите поисковой запрос :</label>
+    <div class="input-group mb-3">
+        <input type="text" id="bookName" name="bookName" class="form-control" required>
+        <button class="btn btn-primary" type="submit">Искать</button>
+    </div>
+</form>
+
+<script th:inline="javascript">
+    (function () {
+        'use strict';
+
+        var forms = document.querySelectorAll('.needs-validation');
+
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    var bookName = document.getElementById("bookName").value;
+                    if (bookName.trim() === "") {
+                        alert("Пожалуйста введите имя книги.");
+                        event.preventDefault();
+                        event.stopPropagation();
+                    } else {
+                        window.location.href = "/books/search/result?bookName=" + encodeURIComponent(bookName);
+                        event.preventDefault(); // Prevent default form submission
+                    }
+                }
+
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+
+<div th:if="${searchResult}">
+    <ul class="list-group">
+        <li th:each="book : ${searchResult}" class="list-group-item">
+            <span th:text="${book.name} + ', ' + ${book.author}"></span>
+            <br>
+            <span th:if="${book.person == null}">Эта книга сейчас свободна.</span>
+            <span th:if="${book.person != null}">Эта книга сейчас у: <span th:text="${book.person.fullName}"></span></span>
+        </li>
+    </ul>
+</div>
+
+<div th:if="${#lists.isEmpty(searchResult)}">
+    <ul class="list-group">
+        <li th:each="book : ${searchResultStartingWith}" class="list-group-item">
+            <span th:text="${book.name} + ', ' + ${book.author}"></span>
+            <br>
+            <span th:if="${book.person == null}">Эта книга сейчас свободна.</span>
+            <span th:if="${book.person != null}">Эта книга сейчас у: <span th:text="${book.person.fullName}"></span></span>
+        </li>
+    </ul>
+</div>
+
+<div th:if="${searchResult.isEmpty() and searchResultStartingWith.isEmpty()}" class="mt-4">
+    <p>Книг не найдено.</p>
+</div>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
